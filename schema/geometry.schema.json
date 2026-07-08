@@ -1,0 +1,377 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/geometry.schema.json",
+  "title": "Geometryv0.1.0",
+  "description": "Unified geometry schema merging GeoJSON (RFC 7946) and CityJSON (v2.0.2) geometry types. Design principles: (1) indexed vertex storage — all coordinates live in a per-geometry `vertices` array; `boundaries` contain only non-negative integer indices; (2) integer-only coordinates — every vertex component is an integer; real-world values are recovered via the per-geometry `innerpose` object as: real[i] = vertex[i] * scale[i] + translate[i]; (3) one canonical type per geometric concept — no alias types; (4) implicit ring closure — the first vertex index is never repeated at the end of a ring; (5) geometry objects are pure shape descriptors — no LoD, no semantic surface annotation; (6) CRS is declared at the representation level in the enclosing linked graph; geometry objects carry no CRS.",
+  "oneOf": [
+    { "$ref": "#/$defs/Point" },
+    { "$ref": "#/$defs/MultiPoint" },
+    { "$ref": "#/$defs/LineString" },
+    { "$ref": "#/$defs/MultiLineString" },
+    { "$ref": "#/$defs/Polygon" },
+    { "$ref": "#/$defs/MultiPolygon" },
+    { "$ref": "#/$defs/CompositeSurface" },
+    { "$ref": "#/$defs/Solid" },
+    { "$ref": "#/$defs/MultiSolid" },
+    { "$ref": "#/$defs/CompositeSolid" }
+  ],
+  "$defs": {
+
+    "coordinate": {
+      "type": "array",
+      "description": "A single vertex coordinate expressed as a 2D [x, y] or 3D [x, y, z] array of integers. Coordinates are always integer-encoded; the geometry object's `innerpose` converts them to real-world values: real[i] = vertex[i] * innerpose.scale[i] + innerpose.translate[i]. Units and axis interpretation are defined by the CRS declared at the representation level in the enclosing linked graph.",
+      "items": { "type": "integer" },
+      "minItems": 2,
+      "maxItems": 3
+    },
+
+    "vertices": {
+      "type": "array",
+      "description": "The shared vertex pool for this geometry object. Every index appearing in `boundaries` references a position in this array. Vertices are 0-indexed. All vertex components are integers; apply `innerpose` to recover real-world coordinates.",
+      "items": { "$ref": "#/$defs/coordinate" },
+      "minItems": 1
+    },
+
+    "index": {
+      "type": "integer",
+      "description": "A zero-based, non-negative integer index into the enclosing geometry object's `vertices` array. The schema enforces that values are non-negative integers but cannot verify that the value is less than the length of `vertices`. Out-of-bounds index references are a geometric validity constraint that MUST be enforced at the application layer.",
+      "minimum": 0
+    },
+
+    "ring": {
+      "type": "array",
+      "description": "An implicitly closed sequence of vertex indices forming one face boundary. The ring is closed by connecting the last index back to the first — the first index MUST NOT be repeated at the end. Minimum 3 distinct indices form a triangle, which is the smallest valid planar face. All indices in a ring must be distinct — repeating an index produces a zero-area degenerate face. The role of a ring (exterior boundary or interior hole) and its required winding direction are determined by its position within the enclosing `polygon` structure, not by the ring itself.",
+      "items": { "$ref": "#/$defs/index" },
+      "minItems": 3,
+      "uniqueItems": true
+    },
+
+    "polygon": {
+      "type": "array",
+      "description": "A single planar surface with optional holes, defined as an ordered array of rings. Ring ordering is a hard requirement: ring 0 MUST be the exterior boundary; rings 1 and above MUST be interior holes. Winding order is also required: the exterior ring MUST be wound counterclockwise (positive shoelace area when projected onto the face plane, i.e. the outward normal follows the right-hand rule); each hole ring MUST be wound clockwise (negative shoelace area). Each ring references vertices in the enclosing geometry's `vertices` array. The following spatial validity constraints cannot be enforced by JSON Schema and MUST be checked at the application layer: (1) each hole ring must lie entirely within the exterior ring; (2) hole rings must not overlap each other; (3) no ring may self-intersect.",
+      "items": { "$ref": "#/$defs/ring" },
+      "minItems": 1
+    },
+
+    "shell": {
+      "type": "array",
+      "description": "A closed surface bounding a volume, expressed as an ordered collection of polygon faces. The polygons must together form a topologically closed, orientable, non-self-intersecting surface (a 2-manifold): every edge must be shared by exactly two faces. Minimum 4 polygon faces are required — a tetrahedron (4 triangular faces) is the smallest valid closed surface. Face winding convention: each face polygon's exterior ring MUST be wound so that its outward surface normal points away from the enclosed volume (counterclockwise when the face is viewed from outside the solid, right-hand rule). The exterior shell encloses the solid's volume; any additional shells in a Solid define interior voids (their face normals point inward, toward the cavity).",
+      "items": { "$ref": "#/$defs/polygon" },
+      "minItems": 4
+    },
+
+    "solid": {
+      "type": "array",
+      "description": "One solid's full boundary, defined as an ordered array of shells. Index 0 is the exterior shell enclosing the volume. Indices 1 and above are interior void shells (cavities within the solid). At least one shell (the exterior) is required.",
+      "items": { "$ref": "#/$defs/shell" },
+      "minItems": 1
+    },
+
+    "transform": {
+      "type": "object",
+      "description": "Affine transform converting integer vertex coordinates to real-world values. Application order: (1) scale each vertex component element-wise by `scale`, (2) if `rotation` is present multiply by the rotation matrix, (3) add `translate`. Without rotation: real[i] = vertex[i] * scale[i] + translate[i]. With rotation: real = rotation * (vertex ⊙ scale) + translate. The dimensionality of `scale`, `translate`, and `rotation` must all match the vertex dimensionality (2 for 2D, 3 for 3D). Units of `translate` and the resulting real-world coordinates are determined by the CRS declared at the representation level in the enclosing linked graph.",
+      "required": ["scale", "translate"],
+      "properties": {
+        "scale": {
+          "type": "array",
+          "description": "Per-axis scale factors applied first. Each integer vertex component is multiplied by the corresponding scale factor before rotation and translation. Must be strictly positive (greater than zero); zero collapses the axis and negative values produce a reflection, neither of which is a valid use in geometry storage. Typically a small positive number representing the precision unit (e.g. 0.001 for millimetre precision in a metre-based CRS).",
+          "items": { "type": "number", "exclusiveMinimum": 0 },
+          "minItems": 2,
+          "maxItems": 3
+        },
+        "rotation": {
+          "type": "array",
+          "description": "Optional orthonormal rotation matrix applied after scaling and before translation. Must be a 2x2 array for 2D geometries or a 3x3 array for 3D geometries — the row count must match the vertex dimensionality. Each row is a unit vector and the rows are mutually orthogonal; the matrix determinant must be +1 (proper rotation, no reflection). Each row vector describes where one local axis points in world space. If omitted the local frame is axis-aligned with the CRS (equivalent to the identity matrix).",
+          "oneOf": [
+            {
+              "description": "2x2 rotation matrix for 2D geometries. Row 0 is the local X axis direction; row 1 is the local Y axis direction.",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": {
+                "type": "array",
+                "minItems": 2,
+                "maxItems": 2,
+                "items": { "type": "number" }
+              }
+            },
+            {
+              "description": "3x3 rotation matrix for 3D geometries. Row 0 is the local X axis direction; row 1 is the local Y axis direction; row 2 is the local Z axis direction.",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": { "type": "number" }
+              }
+            }
+          ]
+        },
+        "translate": {
+          "type": "array",
+          "description": "Per-axis translation offsets added last. Represents the real-world position of the local coordinate frame's origin in the declared CRS (e.g. the south-west corner of the dataset).",
+          "items": { "type": "number" },
+          "minItems": 2,
+          "maxItems": 3
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "bbox": {
+      "type": "array",
+      "description": "Axis-aligned bounding box in local integer coordinate space, expressed as [minCorner, maxCorner]. Each corner is a coordinate array of the same dimensionality as the geometry's vertices (2 elements for 2D, 3 for 3D). Apply the geometry's `innerpose` to convert the corners to real-world coordinates. The bounding box is axis-aligned in local space; when a rotation is present the real-world bounding box will generally be larger than the transformed corners suggest.",
+      "items": { "$ref": "#/$defs/coordinate" },
+      "minItems": 2,
+      "maxItems": 2
+    },
+
+    "GeometryBase": {
+      "type": "object",
+      "description": "Abstract base definition shared by all geometry types. Declares the four fields that every geometry object must carry — `type`, `innerpose`, `vertices`, and `bbox` — and provides the schemas for the three that are structurally identical across all types: `innerpose`, `vertices`, and `bbox`. `boundaries` is required by all non-point types and is enforced via the second `allOf` condition below. Concrete types extend this via `allOf` and supply type-specific schemas for `type` (a string const) and, where applicable, `boundaries`. Not a valid geometry object on its own.",
+      "required": ["type", "innerpose", "vertices", "bbox"],
+      "properties": {
+        "innerpose": { "$ref": "#/$defs/transform" },
+        "vertices": { "$ref": "#/$defs/vertices" },
+        "bbox": { "$ref": "#/$defs/bbox" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "description": "Detect 2D geometry: every vertex coordinate has at most 2 elements.",
+            "required": ["vertices"],
+            "properties": {
+              "vertices": { "items": { "maxItems": 2 } }
+            }
+          },
+          "then": {
+            "description": "For 2D geometries: all vertices must have exactly 2 elements; scale and translate must have exactly 2 elements; rotation (if present) must be 2x2; bbox corners must be 2-element coordinates.",
+            "properties": {
+              "vertices": {
+                "items": { "minItems": 2, "maxItems": 2 }
+              },
+              "innerpose": {
+                "properties": {
+                  "scale":     { "minItems": 2, "maxItems": 2 },
+                  "translate": { "minItems": 2, "maxItems": 2 },
+                  "rotation": {
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": { "minItems": 2, "maxItems": 2 }
+                  }
+                }
+              },
+              "bbox": {
+                "items": { "minItems": 2, "maxItems": 2 }
+              }
+            }
+          },
+          "else": {
+            "description": "For 3D geometries: all vertices must have exactly 3 elements; scale and translate must have exactly 3 elements; rotation (if present) must be 3x3; bbox corners must be 3-element coordinates.",
+            "properties": {
+              "vertices": {
+                "items": { "minItems": 3, "maxItems": 3 }
+              },
+              "innerpose": {
+                "properties": {
+                  "scale":     { "minItems": 3, "maxItems": 3 },
+                  "translate": { "minItems": 3, "maxItems": 3 },
+                  "rotation": {
+                    "minItems": 3,
+                    "maxItems": 3,
+                    "items": { "minItems": 3, "maxItems": 3 }
+                  }
+                }
+              },
+              "bbox": {
+                "items": { "minItems": 3, "maxItems": 3 }
+              }
+            }
+          }
+        },
+        {
+          "description": "Require `boundaries` for all geometry types except Point and MultiPoint, which express their geometry directly through `vertices`.",
+          "if": {
+            "required": ["type"],
+            "properties": { "type": { "not": { "enum": ["Point", "MultiPoint"] } } }
+          },
+          "then": { "required": ["boundaries"] }
+        }
+      ]
+    },
+
+    "Point": {
+      "description": "A 0-dimensional geometry representing a single location in coordinate space. The point position is expressed directly as the sole entry in `vertices` — no `boundaries` field is used. `vertices` must contain exactly one coordinate.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "Point",
+          "description": "Type discriminator. Identifies this geometry as a Point."
+        },
+        "vertices": {
+          "maxItems": 1,
+          "description": "A single-entry vertex pool. The one coordinate is the point's location. `boundaries` is absent; the vertex array itself is the geometry."
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "MultiPoint": {
+      "description": "A 0-dimensional geometry representing a collection of distinct point locations. Each entry in `vertices` is one point in the collection — no `boundaries` field is used. The order of vertices carries no geometric significance.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "MultiPoint",
+          "description": "Type discriminator. Identifies this geometry as a MultiPoint."
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "LineString": {
+      "description": "A 1-dimensional geometry representing an ordered sequence of vertex positions connected by straight segments. The path visits each indexed vertex in order; consecutive index pairs define straight edges.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "LineString",
+          "description": "Type discriminator. Identifies this geometry as a LineString."
+        },
+        "boundaries": {
+          "type": "array",
+          "description": "An ordered array of vertex indices defining the line. The line visits each indexed vertex in sequence. Minimum 2 indices (one segment). Indices may repeat to represent self-intersecting lines.",
+          "items": { "$ref": "#/$defs/index" },
+          "minItems": 2
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "MultiLineString": {
+      "description": "A 1-dimensional geometry representing a collection of LineString components. `boundaries` is an array of line arrays — one array of indices per component line.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "MultiLineString",
+          "description": "Type discriminator. Identifies this geometry as a MultiLineString."
+        },
+        "boundaries": {
+          "type": "array",
+          "description": "An array of line index arrays. Each element is one LineString component: an ordered sequence of at least 2 vertex indices. Components are independent — they may share vertex indices but carry no topological relationship.",
+          "items": {
+            "type": "array",
+            "description": "One LineString component: an ordered sequence of vertex indices. Minimum 2 indices.",
+            "items": { "$ref": "#/$defs/index" },
+            "minItems": 2
+          },
+          "minItems": 1
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "Polygon": {
+      "description": "A 2-dimensional geometry representing a planar surface with optional holes. `boundaries` is an array of rings: index 0 is the exterior boundary; indices 1+ are interior holes. All rings are implicitly closed — the first vertex index is never repeated at the end.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "Polygon",
+          "description": "Type discriminator. Identifies this geometry as a Polygon."
+        },
+        "boundaries": {
+          "$ref": "#/$defs/polygon",
+          "description": "Array of rings. Index 0: exterior boundary (counterclockwise winding, right-hand rule). Indices 1+: interior holes (clockwise winding). Each ring is an implicitly closed sequence of at least 3 vertex indices."
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "MultiPolygon": {
+      "description": "A 2-dimensional geometry representing an unordered collection of independent Polygon geometries. No topological constraints exist between component polygons — they may be disjoint, adjacent, or share vertex indices without implying adjacency. The `boundaries` structure is identical to CompositeSurface; the `type` field is the only differentiator.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "MultiPolygon",
+          "description": "Type discriminator. Identifies this geometry as a MultiPolygon. This type subsumes CityJSON's MultiSurface — the two are structurally and semantically identical."
+        },
+        "boundaries": {
+          "type": "array",
+          "description": "An array of polygon structures. Each element is one independent Polygon component: an array of rings where index 0 is the exterior ring and indices 1+ are holes. Components share the same `vertices` pool but are otherwise unrelated.",
+          "items": { "$ref": "#/$defs/polygon" },
+          "minItems": 1
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "CompositeSurface": {
+      "description": "A 2-dimensional geometry representing an ordered, topologically structured collection of adjacent surface polygons that together form a single closed or semi-closed shell. Unlike MultiPolygon, component surfaces in a CompositeSurface MUST share edges — adjacent surfaces MUST reference the same vertex indices on their shared boundary. Used to represent the full exterior skin of a solid or any other topologically coherent surface assembly. The `boundaries` structure is identical to MultiPolygon; the `type` field is the only differentiator. JSON Schema cannot enforce edge-sharing; topological validity MUST be verified at the application layer.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "CompositeSurface",
+          "description": "Type discriminator. Identifies this geometry as a CompositeSurface."
+        },
+        "boundaries": {
+          "type": "array",
+          "description": "An ordered array of polygon structures forming the composite shell. Each element is one surface polygon. Adjacent polygons in the composite must share vertex indices on their common boundary edges. The union of all polygons should form a topologically consistent shell.",
+          "items": { "$ref": "#/$defs/polygon" },
+          "minItems": 1
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "Solid": {
+      "description": "A 3-dimensional geometry representing a single closed volumetric region. `boundaries` is an array of shells: index 0 is the exterior shell enclosing the volume; indices 1+ are interior void shells (cavities). Each shell is a closed surface formed by an ordered collection of polygons.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "Solid",
+          "description": "Type discriminator. Identifies this geometry as a Solid."
+        },
+        "boundaries": {
+          "$ref": "#/$defs/solid",
+          "description": "Array of shells. Index 0: exterior shell whose polygons enclose the volume. Indices 1+: interior void shells defining cavities within the solid. Each shell must be a topologically closed, orientable surface."
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "MultiSolid": {
+      "description": "A 3-dimensional geometry representing an unordered collection of independent Solid geometries. No topological constraints exist between component solids — they may be spatially disjoint or share vertex indices without implying adjacency. The `boundaries` structure is identical to CompositeSolid; the `type` field is the only differentiator.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "MultiSolid",
+          "description": "Type discriminator. Identifies this geometry as a MultiSolid."
+        },
+        "boundaries": {
+          "type": "array",
+          "description": "An array of solid structures. Each element is one independent Solid component: an array of shells where index 0 is the exterior and indices 1+ are void shells. Components share the same `vertices` pool but carry no topological relationship to each other.",
+          "items": { "$ref": "#/$defs/solid" },
+          "minItems": 1
+        }
+      },
+      "unevaluatedProperties": false
+    },
+
+    "CompositeSolid": {
+      "description": "A 3-dimensional geometry representing an ordered, topologically structured assembly of adjacent solids that share boundary faces. Unlike MultiSolid, component solids in a CompositeSolid MUST be adjacent — they MUST share polygonal faces defined by coincident vertex indices on their shared boundary shells. Together the components form a single coherent volumetric region. The `boundaries` structure is identical to MultiSolid; the `type` field is the only differentiator. JSON Schema cannot enforce face-sharing; topological validity MUST be verified at the application layer.",
+      "allOf": [{ "$ref": "#/$defs/GeometryBase" }],
+      "properties": {
+        "type": {
+          "const": "CompositeSolid",
+          "description": "Type discriminator. Identifies this geometry as a CompositeSolid."
+        },
+        "boundaries": {
+          "type": "array",
+          "description": "An ordered array of solid structures forming the composite volume. Each element is one Solid component: an array of shells. Adjacent solids in the composite must share boundary faces — the shared face polygons reference the same vertex indices in both components.",
+          "items": { "$ref": "#/$defs/solid" },
+          "minItems": 1
+        }
+      },
+      "unevaluatedProperties": false
+    }
+
+  }
+}

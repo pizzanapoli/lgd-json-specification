@@ -1,0 +1,231 @@
+{
+  "context": {
+    "bot":     { "vocabulary": "https://w3id.org/bot#" },
+    "geo":     { "vocabulary": "http://www.opengis.net/ont/geosparql#" },
+    "xsd":     { "vocabulary": "http://www.w3.org/2001/XMLSchema#" },
+    "dcterms": { "vocabulary": "http://purl.org/dc/terms/" }
+  },
+  "geometries": {
+
+    "11223344-5566-4778-8990-aabbccddeeff": {
+      "type": "Polygon",
+      "innerpose": {
+        "scale": [0.001, 0.001],
+        "translate": [85000.0, 446000.0]
+      },
+      "vertices": [
+        [    0,    0],
+        [10000,    0],
+        [10000, 8000],
+        [    0, 8000]
+      ],
+      "boundaries": [[0, 1, 2, 3]],
+      "bbox": [[0, 0], [10000, 8000]]
+    },
+
+    "bb000001-0000-4000-8000-000000000001": {
+      "type": "Polygon",
+      "innerpose": {
+        "scale": [0.001, 0.001],
+        "translate": [85000.0, 446000.0]
+      },
+      "vertices": [
+        [    0,    0],
+        [10000,    0],
+        [10000, 8000],
+        [ 7000, 8000],
+        [ 7000, 6000],
+        [ 3000, 6000],
+        [ 3000, 8000],
+        [    0, 8000]
+      ],
+      "boundaries": [[0, 1, 2, 3, 4, 5, 6, 7]],
+      "bbox": [[0, 0], [10000, 8000]]
+    },
+
+    "bb000002-0000-4000-8000-000000000002": {
+      "type": "Solid",
+      "innerpose": {
+        "scale": [0.001, 0.001, 0.001],
+        "translate": [85000.0, 446000.0, 0.0]
+      },
+      "vertices": [
+        [    0,    0,     0],
+        [10000,    0,     0],
+        [10000, 8000,     0],
+        [    0, 8000,     0],
+        [    0,    0, 15000],
+        [10000,    0, 15000],
+        [10000, 8000, 15000],
+        [    0, 8000, 15000]
+      ],
+      "boundaries": [
+        [
+          [[3, 2, 1, 0]],
+          [[4, 5, 6, 7]],
+          [[0, 1, 5, 4]],
+          [[1, 2, 6, 5]],
+          [[2, 3, 7, 6]],
+          [[3, 0, 4, 7]]
+        ]
+      ],
+      "bbox": [[0, 0, 0], [10000, 8000, 15000]]
+    },
+
+    "ffeeddcc-bbaa-4998-8776-554433221100": {
+      "type": "LineString",
+      "innerpose": {
+        "scale": [0.001, 0.001],
+        "translate": [85000.0, 446000.0]
+      },
+      "vertices": [
+        [-5000, 4000],
+        [    0, 4000],
+        [15000, 4000],
+        [22000, 4000]
+      ],
+      "boundaries": [0, 1, 2, 3],
+      "bbox": [[-5000, 4000], [22000, 4000]]
+    }
+
+  },
+  "nodes": {
+
+    "3f2a1b4c-5d6e-4f8a-9b0c-1d2e3f4a5b6c": {
+      "type": "bot:Building",
+      "metadata": {
+        "name":      { "value": "Town Hall" },
+        "floors":    { "value": 4 },
+        "yearBuilt": { "value": 1923 },
+        "floorArea": { "value": 320.5, "unit": "m2" },
+        "height":    { "value": 15.0, "unit": "m" }
+      }
+    },
+
+    "1a000001-0000-4000-8000-000000000001": {
+      "type": "Footprint",
+      "metadata": {
+        "dcterms:source":    { "value": "BAG 2.0" },
+        "dcterms:publisher": { "value": "Kadaster" },
+        "dcterms:created":   { "value": "2023-06-15", "type": "xsd:date" },
+        "dcterms:license":   { "value": "CC-BY-4.0" }
+      },
+      "representations": {
+        "aa000001-0000-4000-8000-000000000001": {
+          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "geometryIds": ["11223344-5566-4778-8990-aabbccddeeff"]
+        }
+      }
+    },
+
+    "1a000002-0000-4000-8000-000000000002": {
+      "type": "Footprint",
+      "metadata": {
+        "dcterms:source":    { "value": "BAG 2.0" },
+        "dcterms:publisher": { "value": "Kadaster" },
+        "dcterms:created":   { "value": "2023-06-15", "type": "xsd:date" },
+        "dcterms:license":   { "value": "CC-BY-4.0" }
+      },
+      "representations": {
+        "aa000003-0000-4000-8000-000000000003": {
+          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "geometryIds": ["bb000001-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+
+    "1a000003-0000-4000-8000-000000000003": {
+      "type": "BuildingSolid",
+      "metadata": {
+        "dcterms:source":  { "value": "BAG 2.0" },
+        "dcterms:created": { "value": "2023-06-15", "type": "xsd:date" },
+        "dcterms:license": { "value": "CC-BY-4.0" }
+      },
+      "representations": {
+        "aa000004-0000-4000-8000-000000000004": {
+          "crs": { "id": { "authority": "EPSG", "code": 7415 }, "coordinateEpoch": 2023.456 },
+          "geometryIds": ["bb000002-0000-4000-8000-000000000002"]
+        }
+      }
+    },
+
+    "a1b2c3d4-e5f6-4890-abcd-ef1234567890": {
+      "type": "Road",
+      "metadata": {
+        "name":       { "value": "Main Street" },
+        "lanes":      { "value": 2 },
+        "speedLimit": { "value": 50, "unit": "km/h" },
+        "width":      { "value": 6.5, "unit": "m" }
+      }
+    },
+
+    "1a000004-0000-4000-8000-000000000004": {
+      "type": "RoadCenterline",
+      "metadata": {
+        "dcterms:source":    { "value": "BGT 2023" },
+        "dcterms:publisher": { "value": "Gemeente Amsterdam" },
+        "dcterms:created":   { "value": "2023-09-01", "type": "xsd:date" },
+        "dcterms:license":   { "value": "CC-BY-4.0" }
+      },
+      "representations": {
+        "aa000002-0000-4000-8000-000000000002": {
+          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "geometryIds": ["ffeeddcc-bbaa-4998-8776-554433221100"]
+        }
+      }
+    },
+
+    "bcde0123-4567-489a-bcde-f01234567890": {
+      "type": "Intersection",
+      "metadata": {
+        "name":        { "value": "Main St / Market Sq" },
+        "controlled":  { "value": true },
+        "controlType": { "value": "traffic_light" }
+      }
+    }
+
+  },
+  "relations": {
+
+    "fa000001-0000-4000-8000-000000000001": {
+      "predicate": "geo:hasDefaultGeometry",
+      "source": "3f2a1b4c-5d6e-4f8a-9b0c-1d2e3f4a5b6c",
+      "target": "1a000001-0000-4000-8000-000000000001"
+    },
+
+    "fa000002-0000-4000-8000-000000000002": {
+      "predicate": "geo:hasGeometry",
+      "source": "3f2a1b4c-5d6e-4f8a-9b0c-1d2e3f4a5b6c",
+      "target": "1a000002-0000-4000-8000-000000000002"
+    },
+
+    "fa000003-0000-4000-8000-000000000003": {
+      "predicate": "geo:hasGeometry",
+      "source": "3f2a1b4c-5d6e-4f8a-9b0c-1d2e3f4a5b6c",
+      "target": "1a000003-0000-4000-8000-000000000003"
+    },
+
+    "fa000004-0000-4000-8000-000000000004": {
+      "predicate": "geo:hasDefaultGeometry",
+      "source": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
+      "target": "1a000004-0000-4000-8000-000000000004"
+    },
+
+    "deadbeef-cafe-4bab-a5ee-d0d0d0d0d0d0": {
+      "predicate": "adjacentTo",
+      "source": "3f2a1b4c-5d6e-4f8a-9b0c-1d2e3f4a5b6c",
+      "target": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
+      "metadata": {
+        "side":                 { "value": "north" },
+        "sharedBoundaryLength": { "value": 10.0, "unit": "m" }
+      }
+    },
+
+    "cafebabe-dead-4eef-a5a5-b0b1b2b3b4b5": {
+      "predicate": "connects",
+      "source": "a1b2c3d4-e5f6-4890-abcd-ef1234567890",
+      "target": "bcde0123-4567-489a-bcde-f01234567890"
+    }
+
+  }
+}

@@ -1,0 +1,38 @@
+cff-version: 1.2.0
+title: "LGD-JSON: Linked Geometry Document Format"
+message: "If you use this format, please cite it as below."
+type: software
+authors:
+  - family-names: Taraben
+    given-names: Jakob
+    email: code.pizzanapoli@gmail.com
+    orcid: "https://orcid.org/0000-0003-2397-5452"
+  - family-names: Krischler
+    given-names: Judith
+  - family-names: Sternal
+    given-names: Maximilian
+    affiliation: "Technische Universität Berlin"
+  - family-names: Schilling
+    given-names: Sebastian
+    affiliation: "HTW Dresden"
+  - family-names: Clemen
+    given-names: Christian
+    affiliation: "HTW Dresden"
+version: 0.1.0
+date-released: "2026-06-18"
+license: CC-BY-4.0
+repository-code: "https://github.com/pizzanapoli/lgd-json-specification"
+keywords:
+  - GIS
+  - BIM
+  - linked data
+  - JSON Schema
+  - geographic information
+  - graph
+  - geometry
+abstract: >
+  LGD-JSON is a JSON format for representing geographic, built-environment, and building 
+  construction data
+  as a linked graph of typed nodes connected by directed relations. It integrates
+  integer geometry with explicit precision, optional ontology binding, and
+  multi-file distribution support.

@@ -1,0 +1,134 @@
+{
+  "context": {
+    "bot":     { "vocabulary": "https://w3id.org/bot#" },
+    "geo":     { "vocabulary": "http://www.opengis.net/ont/geosparql#" },
+    "prov":    { "vocabulary": "http://www.w3.org/ns/prov#" },
+    "xsd":     { "vocabulary": "http://www.w3.org/2001/XMLSchema#" },
+    "dcterms": { "vocabulary": "http://purl.org/dc/terms/" }
+  },
+  "geometries": {
+
+    "aaaa0001-0000-4000-8000-000000000001": {
+      "type": "Polygon",
+      "innerpose": { "scale": [0.001, 0.001], "translate": [85000.0, 446000.0] },
+      "vertices": [[0, 0], [20000, 0], [20000, 10000], [0, 10000]],
+      "boundaries": [[0, 1, 2, 3]],
+      "bbox": [[0, 0], [20000, 10000]]
+    },
+
+    "aaaa0002-0000-4000-8000-000000000002": {
+      "type": "Solid",
+      "innerpose": { "scale": [0.001, 0.001, 0.001], "translate": [85000.0, 446000.0, 0.0] },
+      "vertices": [
+        [    0,     0,     0],
+        [20000,     0,     0],
+        [20000, 10000,     0],
+        [    0, 10000,     0],
+        [    0,     0, 15000],
+        [20000,     0, 15000],
+        [20000, 10000, 15000],
+        [    0, 10000, 15000]
+      ],
+      "boundaries": [
+        [
+          [[3, 2, 1, 0]],
+          [[4, 5, 6, 7]],
+          [[0, 1, 5, 4]],
+          [[1, 2, 6, 5]],
+          [[2, 3, 7, 6]],
+          [[3, 0, 4, 7]]
+        ]
+      ],
+      "bbox": [[0, 0, 0], [20000, 10000, 15000]]
+    },
+
+    "aaaa0003-0000-4000-8000-000000000003": {
+      "type": "GeometryLink",
+      "href": "scans/town-hall-2024.laz",
+      "mime": "application/vnd.laszip"
+    }
+
+  },
+  "nodes": {
+
+    "bbbb0001-0000-4000-8000-000000000001": {
+      "type": "bot:Building",
+      "metadata": {
+        "name": { "value": "Town Hall" }
+      }
+    },
+
+    "bbbb0002-0000-4000-8000-000000000002": {
+      "type": "Footprint",
+      "metadata": {
+        "dcterms:source":  { "value": "BGT 2023" },
+        "dcterms:created": { "value": "2023-04-12", "type": "xsd:date" }
+      },
+      "representations": {
+        "cccc0001-0000-4000-8000-000000000001": {
+          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "geometryIds": ["aaaa0001-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+
+    "bbbb0003-0000-4000-8000-000000000003": {
+      "type": "CADModel",
+      "metadata": {
+        "dcterms:source":  { "value": "Revit IFC export" },
+        "dcterms:created": { "value": "2024-02-20", "type": "xsd:date" }
+      },
+      "representations": {
+        "cccc0002-0000-4000-8000-000000000002": {
+          "crs": { "id": { "authority": "EPSG", "code": 7415 } },
+          "geometryIds": ["aaaa0002-0000-4000-8000-000000000002"]
+        }
+      }
+    },
+
+    "bbbb0004-0000-4000-8000-000000000004": {
+      "type": "LaserScan",
+      "metadata": {
+        "dcterms:source":  { "value": "terrestrial LiDAR survey" },
+        "dcterms:created": { "value": "2024-01-15", "type": "xsd:date" }
+      },
+      "representations": {
+        "cccc0003-0000-4000-8000-000000000003": {
+          "crs": { "id": { "authority": "EPSG", "code": 7415 } },
+          "geometryIds": ["aaaa0003-0000-4000-8000-000000000003"]
+        }
+      }
+    }
+
+  },
+  "relations": {
+
+    "dddd0001-0000-4000-8000-000000000001": {
+      "predicate": "geo:hasDefaultGeometry",
+      "source": "bbbb0001-0000-4000-8000-000000000001",
+      "target": "bbbb0002-0000-4000-8000-000000000002"
+    },
+
+    "dddd0002-0000-4000-8000-000000000002": {
+      "predicate": "geo:hasGeometry",
+      "source": "bbbb0001-0000-4000-8000-000000000001",
+      "target": "bbbb0003-0000-4000-8000-000000000003"
+    },
+
+    "dddd0003-0000-4000-8000-000000000003": {
+      "predicate": "geo:hasGeometry",
+      "source": "bbbb0001-0000-4000-8000-000000000001",
+      "target": "bbbb0004-0000-4000-8000-000000000004"
+    },
+
+    "dddd0004-0000-4000-8000-000000000004": {
+      "predicate": "prov:wasDerivedFrom",
+      "source": "bbbb0003-0000-4000-8000-000000000003",
+      "target": "bbbb0004-0000-4000-8000-000000000004",
+      "metadata": {
+        "note": { "value": "CAD model fitted to the registered point cloud" }
+      }
+    }
+
+  }
+}

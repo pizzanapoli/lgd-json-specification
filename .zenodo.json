@@ -1,0 +1,44 @@
+{
+  "title": "LGD-JSON: Linked Geometry Document Format",
+  "upload_type": "software",
+  "description": "LGD-JSON is a JSON format for representing geographic, built-environment, and building construction data as a linked graph of typed nodes connected by directed relations. It integrates integer geometry with explicit precision, optional ontology binding, and multi-file distribution support.",
+  "creators": [
+    {
+      "name": "Taraben, Jakob",
+      "orcid": "0000-0003-2397-5452"
+    },
+    {
+      "name": "Krischler, Judith"
+    },
+    {
+      "name": "Sternal, Maximilian",
+      "affiliation": "Technische Universität Berlin"
+    },
+    {
+      "name": "Schilling, Sebastian",
+      "affiliation": "HTW Dresden"
+    },
+    {
+      "name": "Clemen, Christian",
+      "affiliation": "HTW Dresden"
+    }
+  ],
+  "license": "CC-BY-4.0",
+  "version": "0.1.0",
+  "keywords": [
+    "GIS",
+    "BIM",
+    "linked data",
+    "JSON Schema",
+    "geographic information",
+    "graph",
+    "geometry"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isDocumentedBy",
+      "identifier": "https://github.com/pizzanapoli/lgd-json-specification",
+      "resource_type": "publication-softwaredocumentation"
+    }
+  ]
+}

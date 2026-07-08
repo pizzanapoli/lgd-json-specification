@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/relations.schema.json",
+  "title": "Graph Relationv0.1.0",
+  "description": "A directed relation (edge) between two nodes in a linked graph. The relation's UUID identity is its key in the enclosing `relations` dictionary — the object itself carries no `id` field. The relation classifies the relationship with a predicate string and names source and target nodes by their UUIDs. Arbitrary application-specific properties are carried in the optional `metadata` object. Relations are always directed (source → target); undirected relationships can be modelled by convention in `predicate` or by creating two opposing relations.",
+  "type": "object",
+  "required": ["predicate", "source", "target"],
+  "properties": {
+
+    "predicate": {
+      "type": "string",
+      "minLength": 1,
+      "description": "String describing the directed relationship between source and target. May be a plain application-defined string (e.g. \"adjacentTo\", \"connectedBy\") or a contexted compact IRI (e.g. \"geo:sfWithin\", \"dcterms:isPartOf\", \"prov:wasDerivedFrom\") whose prefix is declared in the document `context`. The schema enforces only that the value is a non-empty string; term validity for a contexted predicate is governed by the namespace's `vocabulary` (ontology), not by JSON Schema."
+    },
+
+    "source": {
+      "$ref": "objects.schema.json#/$defs/uuid",
+      "description": "UUID of the source node at the tail of this directed relation. Referential integrity — that this UUID exists as a key in the graph's `nodes` dictionary — cannot be enforced by JSON Schema and MUST be verified at the application layer."
+    },
+
+    "target": {
+      "$ref": "objects.schema.json#/$defs/uuid",
+      "description": "UUID of the target node at the head of this directed relation. Same referential integrity caveat as `source` applies."
+    },
+
+    "metadata": {
+      "$ref": "objects.schema.json#/$defs/metadata",
+      "description": "Optional key-value map of application-specific relation properties (e.g. weight, label, timestamp, confidence). Each value is a value object ({value, type?, language?, direction?, unit?}) — see objects.schema.json#/$defs/value. Keys may be contexted compact IRIs whose prefix is declared in the document `context`."
+    }
+
+  },
+  "additionalProperties": false
+}

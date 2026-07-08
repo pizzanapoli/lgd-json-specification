@@ -1,0 +1,38 @@
+{
+  "context": {
+    "mat": {
+      "vocabulary": "http://example.org/lgd/material#",
+      "constraint": "file:examples/material.schema.json"
+    }
+  },
+  "nodes": {
+
+    "ad000001-0000-4000-8000-000000000001": {
+      "type": "Material",
+      "metadata": {
+        "name":                    { "value": "Reinforced Concrete C30/37" },
+        "mat:density":             { "value": 2400, "unit": "kg/m3" },
+        "mat:thermalConductivity": { "value": 2.3,  "unit": "W/(m.K)" },
+        "mat:fireRating":          { "value": 90,   "unit": "min" },
+        "mat:compressiveStrength": { "value": 30,   "unit": "MPa" }
+      }
+    },
+
+    "be000001-0000-4000-8000-000000000001": {
+      "type": "Wall",
+      "metadata": {
+        "name": { "value": "External wall W-01" }
+      }
+    }
+
+  },
+  "relations": {
+
+    "ce000001-0000-4000-8000-000000000001": {
+      "predicate": "hasMaterial",
+      "source": "be000001-0000-4000-8000-000000000001",
+      "target": "ad000001-0000-4000-8000-000000000001"
+    }
+
+  }
+}

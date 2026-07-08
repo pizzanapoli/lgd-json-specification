@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/node.schema.json",
+  "title": "Graph Nodev0.1.0",
+  "description": "A node in a linked graph. Nodes represent domain entities (buildings, roads, sensors, etc.) identified by a UUID and classified by a type string. The node's UUID identity is its key in the enclosing `nodes` dictionary — the object itself carries no `id` field. Geometric representations are attached via the optional `representations` dict — each entry groups a set of geometry UUIDs from the graph's `geometries` dict with a CRS and an optional outer pose. Arbitrary application-specific properties are carried in the optional `metadata` object.",
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+
+    "type": {
+      "type": "string",
+      "minLength": 1,
+      "description": "String classifying this node. May be a plain application-defined string (e.g. \"Building\", \"Road\", \"Sensor\") or a contexted compact IRI (e.g. \"bot:Building\") whose prefix is declared in the document `context`. The schema enforces only that the value is a non-empty string; term validity for a contexted type is governed by the namespace's `vocabulary` (ontology), not by JSON Schema. A node carries a single type; multiple JSON-LD-style types are expressed as a metadata entry with a list value (e.g. an `rdf:type` key)."
+    },
+
+    "representations": {
+      "type": "object",
+      "description": "Optional UUID-keyed dictionary of geometric representations of this node. Each entry is purely a geometry-to-CRS binding: it groups one or more geometry UUIDs (referencing keys in the enclosing graph's `geometries` dict) with a coordinate reference system and an optional outer pose. Representations carry no metadata — descriptive metadata about the encoding (LOD, provenance) lives on the node's `metadata`. A node typically has one representation; multiple entries are for the same geometry in alternative serializations (e.g. an OBJ and a PLY GeometryLink, distinguished by their `mime`) or different CRS projections. Distinct encodings that need their own identity or relations (e.g. a conversion recorded via `prov:wasDerivedFrom`) are modelled as separate nodes.",
+      "propertyNames": { "$ref": "objects.schema.json#/$defs/uuid" },
+      "additionalProperties": {
+        "type": "object",
+        "required": ["crs", "geometryIds"],
+        "properties": {
+
+          "crs": {
+            "$ref": "objects.schema.json#/$defs/crs",
+            "description": "CRS for this representation — the coordinate reference system that real-world coordinates land in after all geometry innerposes and the optional outerpose are applied. Either a compact reference `{ \"id\": { \"authority\": \"EPSG\", \"code\": 28992 } }` (with optional `coordinateEpoch` for dynamic datums, e.g. `{ \"id\": { \"authority\": \"EPSG\", \"code\": 7912 }, \"coordinateEpoch\": 2023.456 }`), or a full PROJJSON CRS / CoordinateMetadata object for custom/local/engineering CRS. See objects.schema.json#/$defs/crs."
+          },
+
+          "outerpose": {
+            "$ref": "geometry.schema.json#/$defs/transform",
+            "description": "Optional affine transform applied on top of each referenced geometry's own innerpose. Useful when multiple geometries are positioned as a unit at a specific site. If absent, each geometry's innerpose delivers coordinates directly into the CRS."
+          },
+
+          "geometryIds": {
+            "type": "array",
+            "description": "Non-empty array of unique UUID strings, each referencing a key in the enclosing graph's `geometries` dict. A representation may reference multiple geometry primitives (e.g. separate wall and roof polygons composing one building shell). Referential integrity — that each UUID exists in `geometries` — cannot be enforced by JSON Schema and MUST be verified at the application layer.",
+            "items": { "$ref": "objects.schema.json#/$defs/uuid" },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+
+        },
+        "additionalProperties": false
+      }
+    },
+
+    "metadata": {
+      "$ref": "objects.schema.json#/$defs/metadata",
+      "description": "Optional key-value map of node properties. This is the home for all descriptive metadata about the node, including identity/application attributes, level-of-detail (`lod:gis`), and provenance (`provenance:*`) — representations carry none. Each value is a value object ({value, type?, language?, direction?, unit?}) — see objects.schema.json#/$defs/value. Keys may be contexted compact IRIs whose prefix is declared in the document `context`."
+    }
+
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "material.schema.json",
+  "title": "Material Properties Vocabulary (example constraint schema)",
+  "description": "EXAMPLE constraint schema — not part of the core LGD schema set. It shows how a producer defines their own governed vocabulary and binds it to a namespace prefix via `context.<prefix>.constraint` (here the `mat` prefix). Like the core vocabulary validators it is keyed on LOCAL names (`density`, not `mat:density`) and validates the de-prefixed, namespace-grouped subset of a node's `metadata`. Unlike the `lod`/`provenance` validators, it exercises the full value-object model: each property is a measured quantity whose `.value` is range-checked AND whose `.unit` is pinned, so a wrong unit, a negative magnitude, or a missing unit is rejected. All properties are optional; additional local names are allowed and not constrained.",
+  "type": "object",
+  "properties": {
+
+    "density": {
+      "type": "object",
+      "description": "Mass density value object (metadata key `mat:density`). Value in kg/m3, non-negative.",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit":  { "const": "kg/m3" }
+      }
+    },
+
+    "thermalConductivity": {
+      "type": "object",
+      "description": "Thermal conductivity value object (metadata key `mat:thermalConductivity`). Value in W/(m.K), non-negative.",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit":  { "const": "W/(m.K)" }
+      }
+    },
+
+    "fireRating": {
+      "type": "object",
+      "description": "Fire resistance rating value object (metadata key `mat:fireRating`). Whole minutes, non-negative.",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "integer", "minimum": 0 },
+        "unit":  { "const": "min" }
+      }
+    },
+
+    "compressiveStrength": {
+      "type": "object",
+      "description": "Characteristic compressive strength value object (metadata key `mat:compressiveStrength`). Value in MPa, non-negative.",
+      "required": ["value", "unit"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit":  { "const": "MPa" }
+      }
+    }
+
+  }
+}

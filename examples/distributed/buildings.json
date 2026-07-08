@@ -1,0 +1,42 @@
+{
+  "context": {
+    "bot": { "vocabulary": "https://w3id.org/bot#" },
+    "geo": { "vocabulary": "http://www.opengis.net/ont/geosparql#" }
+  },
+  "geometries": {
+    "a0000000-0000-4000-8000-000000000001": {
+      "type": "Polygon",
+      "innerpose": { "scale": [0.001, 0.001], "translate": [85000.0, 446000.0] },
+      "vertices": [[0, 0], [10000, 0], [10000, 8000], [0, 8000]],
+      "boundaries": [[0, 1, 2, 3]],
+      "bbox": [[0, 0], [10000, 8000]]
+    }
+  },
+  "nodes": {
+    "b0000000-0000-4000-8000-000000000001": {
+      "type": "bot:Building",
+      "metadata": {
+        "name": { "value": "Town Hall" }
+      }
+    },
+    "f0000000-0000-4000-8000-000000000001": {
+      "type": "Footprint",
+      "representations": {
+        "c0000000-0000-4000-8000-000000000001": {
+          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "geometryIds": ["a0000000-0000-4000-8000-000000000001"]
+        }
+      }
+    },
+    "b0000000-0000-4000-8000-000000000002": {
+      "type": "Parcel"
+    }
+  },
+  "relations": {
+    "e0000000-0000-4000-8000-000000000001": {
+      "predicate": "geo:hasDefaultGeometry",
+      "source": "b0000000-0000-4000-8000-000000000001",
+      "target": "f0000000-0000-4000-8000-000000000001"
+    }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/objects.schema.json",
+  "title": "Shared Graph Object Definitionsv0.1.0",
+  "description": "Definitions-only schema providing reusable primitives shared across node.schema.json, relations.schema.json, and linkedgraph.schema.json. Contains no standalone-validatable root type — it is a library of $defs.",
+
+  "$defs": {
+
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      "description": "A UUID string in canonical 8-4-4-4-12 hex format (case-insensitive). Used as the identifier type for nodes, relations, geometry entries, and representations throughout the linked graph."
+    },
+
+    "value": {
+      "type": "object",
+      "description": "A single metadata value, modelled as a JSON-LD-style value object. The `value` field carries the datum and is the only required field; the optional `type`, `language`, `direction`, and `unit` fields annotate it. This object subsumes the former `quantity` type — a measured quantity is simply the `value` + `unit` case. It maps directly to a JSON-LD value object: `value`↔`@value`, `type`↔`@type`, `language`↔`@language`, `direction`↔`@direction`. `unit` is an LGD-specific extension with no native JSON-LD counterpart.",
+      "required": ["value"],
+      "properties": {
+
+        "value": {
+          "description": "The datum: a scalar (string, number, integer, boolean, null) or a non-empty list of scalars. A list carries a multi-valued literal property (e.g. several names, or several rdf:type IRIs). Absence of a value is expressed by omitting the metadata key, not by an empty list. Arbitrary nested objects are not permitted.",
+          "anyOf": [
+            { "type": ["string", "number", "integer", "boolean", "null"] },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": ["string", "number", "integer", "boolean", "null"] }
+            }
+          ]
+        },
+
+        "type": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional datatype of the value. Either a JSON-LD keyword — `@id` (the value is an IRI / node reference) or `@json` — or a datatype compact IRI such as `xsd:date` or `xsd:integer`. Compact-IRI datatypes resolve against the document `context` and their validity is an ontology (vocabulary) matter; the JSON-LD keywords are a fixed reserved set."
+        },
+
+        "language": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional BCP-47 language tag for a string value (e.g. \"en\", \"de\", \"ja\"). Maps to JSON-LD `@language`."
+        },
+
+        "direction": {
+          "type": "string",
+          "enum": ["ltr", "rtl"],
+          "description": "Optional base text direction for a (language-tagged) string value. Maps to JSON-LD `@direction`."
+        },
+
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional unit of measurement as a non-empty string (LGD extension; subsumes the former `quantity` type). Recommended values are SI unit symbols (m, m2, m3, kg, K, Pa) or UCUM codes. The unit vocabulary is not constrained by this schema."
+        }
+
+      },
+      "additionalProperties": false
+    },
+
+    "metadata": {
+      "type": "object",
+      "description": "Key-value map of application-specific properties. Keys are strings; a key MAY be a compact IRI (`prefix:localName`) whose prefix is declared in the document `context`. Each value is a value object ({value, type?, language?, direction?, unit?}) — see the `value` $def. This uniform shape carries datatypes, language/direction tags, units, and multi-valued literals, and makes a metadata object a faithful, losslessly JSON-LD-mappable set of value objects.",
+      "additionalProperties": { "$ref": "#/$defs/value" }
+    },
+
+    "namespace": {
+      "type": "object",
+      "description": "A namespace binding in the document `context`. Pairs an ontology/namespace IRI (`vocabulary`) that gives the prefix's terms their global meaning with an optional JSON Schema (`constraint`) that validates that namespace's metadata entries. Both values must be full URIs carrying a scheme; relative paths are not permitted (use `file:schema/lod.schema.json`, not `schema/lod.schema.json`).",
+      "required": ["vocabulary"],
+      "properties": {
+
+        "vocabulary": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9+.-]*:",
+          "description": "Ontology/namespace IRI that the prefix's terms expand against (e.g. \"http://www.opengis.net/ont/geosparql#\"). Determines the meaning of predicates, node types, and metadata keys/datatypes that use this prefix. Term validity (that a given local name exists in the ontology) is governed here, not by JSON Schema. The `pattern` enforces that the value carries a URI scheme (e.g. `http:`, `urn:`) since `format` is annotation-only in JSON Schema; full RFC-3986 validity remains an application-layer concern."
+        },
+
+        "constraint": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^[a-zA-Z][a-zA-Z0-9+.-]*:",
+          "description": "Optional URI of a JSON Schema validating this namespace's metadata entries. The schema is keyed on local names (e.g. `gis`, not `lod:gis`) and constrains the de-prefixed value objects (typically the nested `.value`). Must be a full URI with a scheme (e.g. \"file:schema/lod.schema.json\"); the `pattern` rejects bare relative paths such as \"schema/lod.schema.json\"."
+        }
+
+      },
+      "additionalProperties": false
+    },
+
+    "context": {
+      "type": "object",
+      "description": "Optional map of namespace prefixes to namespace bindings. A prefix used in any predicate, node `type`, metadata key, or value-object `type` (as a compact IRI `prefix:localName`) MUST be declared here. Resolution: split the compact IRI on its single colon, look up the prefix's `vocabulary`, and concatenate the local name. Namespacing is entirely optional and may be freely mixed with plain unprefixed strings; that a used prefix is declared is an application-layer check, not enforceable by JSON Schema.",
+      "propertyNames": { "pattern": "^[A-Za-z][A-Za-z0-9_-]*$" },
+      "additionalProperties": { "$ref": "#/$defs/namespace" }
+    },
+
+    "GeometryLink": {
+      "type": "object",
+      "description": "A reference to an external geometry resource used in place of an inline geometry object. Enables instancing and keeps large geometry datasets in separate files while still participating in a graph. The `type` field is fixed to \"GeometryLink\" — it aligns structurally with inline geometry objects (which also require `type`) and serves as an explicit discriminator between the two entry kinds in the `geometries` dictionary. Resolution and validation of the referenced content are application-layer concerns.",
+      "required": ["type", "href"],
+      "properties": {
+
+        "type": {
+          "type": "string",
+          "const": "GeometryLink",
+          "description": "Fixed type discriminator. Always \"GeometryLink\". Aligns with the `type` field required on all inline geometry objects, allowing consumers to identify link entries without fetching the referenced resource."
+        },
+
+        "href": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "URI or relative path to an external file that resolves to a valid geometry object (geometry.schema.json). Relative paths are resolved relative to the document containing this link."
+        },
+
+        "mime": {
+          "type": "string",
+          "description": "Optional IANA media type (content type) of the referenced file, e.g. \"application/json\", \"application/gzip\", \"model/gltf+json\", \"application/x-hdf5\". Allows consumers to select an appropriate parser before fetching the resource. When absent the consumer must infer the format from the file extension or by inspecting the resource."
+        }
+
+      },
+      "additionalProperties": false
+    },
+
+    "crsId": {
+      "type": "object",
+      "description": "Reference to an authority-registered CRS, reusing PROJJSON's `id` structure. `authority` and `code` are required (e.g. EPSG:28992); `version`, `authority_citation`, and `uri` are optional. CRS validity — that the code exists in the registry — is an application-layer / PROJ concern, not enforced here.",
+      "required": ["authority", "code"],
+      "properties": {
+
+        "authority": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Registry authority, e.g. \"EPSG\" or \"OGC\"."
+        },
+
+        "code": {
+          "description": "CRS code within the authority (e.g. 28992). String or integer, per PROJJSON.",
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            { "type": "integer" }
+          ]
+        },
+
+        "version": {
+          "description": "Optional authority version of the CRS definition.",
+          "oneOf": [ { "type": "string" }, { "type": "number" } ]
+        },
+
+        "authority_citation": { "type": "string" },
+
+        "uri": {
+          "type": "string",
+          "description": "Optional OGC URI for the same CRS, e.g. \"http://www.opengis.net/def/crs/EPSG/0/28992\"."
+        }
+
+      },
+      "additionalProperties": false
+    },
+
+    "crs": {
+      "description": "Coordinate reference system for a representation, unified on PROJJSON vocabulary as a `oneOf` of two forms. (1) **Reference** — `{ id, coordinateEpoch? }` — names a registered CRS by authority+code (the common case); the optional `coordinateEpoch` (decimal year) pins the epoch for time-dependent datums (ITRF2014, ETRF2014, GDA2020). (2) **PROJJSON** — a full PROJJSON CRS (ProjectedCRS, GeographicCRS, EngineeringCRS, …) or CoordinateMetadata object, identified by its `type`, for custom/local/engineering CRS or self-contained documents. The reference form is an LGD subset that reuses PROJJSON's `id`; the full form is the PROJJSON extension (PROJJSON v0.7: https://proj.org/schemas/). The two are discriminated by `id`-vs-`type`. Detailed PROJJSON validity is an opt-in profile / application-layer concern — the base schema only checks the shape.",
+      "oneOf": [
+        {
+          "description": "Reference form: a registered CRS by id, with an optional coordinate epoch.",
+          "type": "object",
+          "required": ["id"],
+          "properties": {
+            "id": { "$ref": "#/$defs/crsId" },
+            "coordinateEpoch": {
+              "type": "number",
+              "minimum": 1900,
+              "description": "Coordinate epoch as a decimal year (e.g. 2023.456) for time-dependent datums. Omit for static frames. Named per PROJJSON's `coordinateEpoch`."
+            }
+          },
+          "additionalProperties": false
+        },
+        {
+          "description": "Full PROJJSON form: a PROJJSON CRS or CoordinateMetadata object, identified by `type`. Additional PROJJSON members are accepted; detailed validity is deferred to the PROJJSON schema / application layer.",
+          "type": "object",
+          "required": ["type"],
+          "properties": {
+            "type": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+
+    "globalextent": {
+      "type": "array",
+      "description": "Geographic bounding box in WGS 84 (EPSG:4326), expressed as [southWest, northEast] — two [longitude, latitude] corners in decimal degrees. This field is distinct from the per-geometry `bbox`, which lives in local integer coordinate space before any transform is applied. `globalextent` is in real-world geographic space, CRS-independent, and suitable for spatial discovery, indexing, and interoperability with systems that expect WGS 84 bounds (map viewers, catalogues, OGC APIs). It is optional and must be computed by the application after resolving all geometry innerposes and any outerposes into WGS 84 coordinates. Longitude is bounded to [-180, 180]; latitude to [-90, 90].",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "array",
+        "description": "A [longitude, latitude] corner in WGS 84 decimal degrees.",
+        "minItems": 2,
+        "maxItems": 2,
+        "prefixItems": [
+          {
+            "type": "number",
+            "minimum": -180,
+            "maximum": 180,
+            "description": "Longitude in decimal degrees. West is negative, east is positive."
+          },
+          {
+            "type": "number",
+            "minimum": -90,
+            "maximum": 90,
+            "description": "Latitude in decimal degrees. South is negative, north is positive."
+          }
+        ],
+        "items": false
+      }
+    }
+
+  }
+}

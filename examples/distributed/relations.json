@@ -1,0 +1,12 @@
+{
+  "context": {
+    "geo": { "vocabulary": "http://www.opengis.net/ont/geosparql#" }
+  },
+  "relations": {
+    "d0000000-0000-4000-8000-000000000001": {
+      "predicate": "geo:sfWithin",
+      "source": "b0000000-0000-4000-8000-000000000001",
+      "target": "b0000000-0000-4000-8000-000000000002"
+    }
+  }
+}

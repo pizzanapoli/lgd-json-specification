@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/linkedgraph.schema.json",
+  "title": "Linked Graphv0.1.0",
+  "description": "A linked graph document composed of three UUID-keyed dictionaries: geometries, nodes, and relations, plus an optional `context`. Every key in those three entry dictionaries is a UUID in canonical 8-4-4-4-12 hex format, enforced by the schema (keys of the optional `context` are namespace prefixes, not UUIDs). All dictionaries are optional — a valid graph may contain any combination. The UUID key is the sole identity of each entry — node, relation, and representation objects carry no redundant `id` field. Geometric representations of nodes are expressed via the `representations` field on each node, grouping geometry UUIDs with a CRS and optional outer pose. Cross-references between entries (e.g. relation source/target, representation geometryIds) are UUID strings; referential integrity cannot be enforced by JSON Schema and MUST be verified at the application layer. The optional `context` binds namespace prefixes used in predicates, node types, and metadata keys to ontologies and validators; that a used prefix is declared in `context` is likewise an application-layer check.",
+  "type": "object",
+  "properties": {
+
+    "context": {
+      "$ref": "objects.schema.json#/$defs/context",
+      "description": "Optional map of namespace prefixes to namespace bindings ({vocabulary, constraint?}). Prefixes declared here may be used as compact IRIs (`prefix:localName`) in relation predicates, node `type`s, metadata keys, and value-object datatypes. Namespacing is opt-in and may be mixed freely with plain unprefixed strings. See objects.schema.json#/$defs/context."
+    },
+
+    "geometries": {
+      "type": "object",
+      "description": "UUID-keyed dictionary of geometry entries. Each key must be a UUID; each value is either an inline geometry object (geometry.schema.json) or a GeometryLink pointer to an external geometry resource (objects.schema.json#/$defs/GeometryLink).",
+      "propertyNames": { "$ref": "objects.schema.json#/$defs/uuid" },
+      "additionalProperties": {
+        "oneOf": [
+          { "$ref": "geometry.schema.json" },
+          { "$ref": "objects.schema.json#/$defs/GeometryLink" }
+        ]
+      }
+    },
+
+    "nodes": {
+      "type": "object",
+      "description": "UUID-keyed dictionary of graph nodes. Each key must be a UUID; each value must be a valid node object (node.schema.json). The key is the node's UUID identity — node objects carry no `id` field.",
+      "propertyNames": { "$ref": "objects.schema.json#/$defs/uuid" },
+      "additionalProperties": { "$ref": "node.schema.json" }
+    },
+
+    "relations": {
+      "type": "object",
+      "description": "UUID-keyed dictionary of directed relations between nodes. Each key must be a UUID; each value must be a valid relation object (relations.schema.json). The key is the relation's UUID identity — relation objects carry no `id` field.",
+      "propertyNames": { "$ref": "objects.schema.json#/$defs/uuid" },
+      "additionalProperties": { "$ref": "relations.schema.json" }
+    },
+
+    "globalextent": {
+      "$ref": "objects.schema.json#/$defs/globalextent",
+      "description": "Optional WGS 84 bounding box covering all geometries in this graph, expressed as [southWest, northEast] in decimal degrees. CRS-independent and suitable for spatial discovery. Must be computed by the application after resolving all geometry innerposes and representation outerposes into WGS 84 coordinates."
+    }
+
+  },
+  "additionalProperties": false
+}
