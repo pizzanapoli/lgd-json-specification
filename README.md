@@ -1,9 +1,9 @@
 # Linked Geometry Document (LGD)
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21307295.svg)](https://doi.org/10.5281/zenodo.21307295)
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC_BY_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
-<!-- DOI: replace XXXXXXX with the Zenodo *concept* DOI once the first release is published. -->
+<!-- DOI: 10.5281/zenodo.21307295 is the Zenodo *concept* DOI, set once the first release was published. -->
 
 A JSON format for representing geographic and built-environment data as a linked graph of typed nodes connected by directed relations, with compact integer geometry and explicit coordinate reference system declarations.
 
@@ -1137,12 +1137,12 @@ version:
                Schilling, Sebastian and Clemen, Christian},
   year      = {2026},
   version   = {0.1.0},
-  doi       = {10.5281/zenodo.XXXXXXX},
+  doi       = {10.5281/zenodo.21307295},
   url       = {https://github.com/pizzanapoli/lgd-json-specification}
 }
 ```
 
-<!-- Replace XXXXXXX with the Zenodo concept DOI once the first release is published. -->
+<!-- 10.5281/zenodo.21307295 is the Zenodo concept DOI, set once the first release was published. -->
 
 ---
 
