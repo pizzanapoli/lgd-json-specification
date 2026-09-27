@@ -43,11 +43,12 @@ Crucially, the format is built to lift cleanly into the ontology world: node UUI
 
 ## Format Structure
 
-An LGD document is a JSON object containing three optional UUID-keyed dictionaries, an optional bounding box, and an optional namespace `context`:
+An LGD document is a JSON object containing four optional UUID-keyed dictionaries, an optional bounding box, and an optional namespace `context`:
 
 ```json
 {
   "context":    { "<prefix>": { "vocabulary": "<iri>", "constraint": "<uri>" }, ... },
+  "crs":        { "<uuid>": <CRS>, ... },
   "geometries": { "<uuid>": <geometry or GeometryLink>, ... },
   "nodes":      { "<uuid>": <node>, ... },
   "relations":  { "<uuid>": <relation>, ... },
@@ -55,7 +56,7 @@ An LGD document is a JSON object containing three optional UUID-keyed dictionari
 }
 ```
 
-Every key in the three entry dictionaries (`geometries`, `nodes`, `relations`) is a UUID in canonical `8-4-4-4-12` hex format. The key is the sole identity of each entry - objects themselves carry no `id` field, eliminating the risk of key/value divergence. (Keys of the optional `context` object are namespace prefixes, not UUIDs.)
+Every key in the four entry dictionaries (`crs`, `geometries`, `nodes`, `relations`) is a UUID in canonical `8-4-4-4-12` hex format. The key is the sole identity of each entry - objects themselves carry no `id` field, eliminating the risk of key/value divergence. (Keys of the optional `context` object are namespace prefixes, not UUIDs.)
 
 ### The Graph Model
 
@@ -69,27 +70,36 @@ Every key in the three entry dictionaries (`geometries`, `nodes`, `relations`) i
  ┌──────────────┐         ┌──────────────────┐    ┌────────────────────────┐
  │ <uuid>:      │◄────────│ representations  │    │ <uuid>:                │
  │   geometry   │  via    │   [<uuid>]:      │    │   predicate: "..."     │
- │   or link    │ geomIds │     crs          │    │   source: <node uuid>  │
+ │   or link    │ geomIds │     crsId        │    │   source: <node uuid>  │
  └──────────────┘         │     outerpose?   │    │   target: <node uuid>  │
                           │     geometryIds  │    │   metadata?            │
                           │ type: "..."      │    └────────────────────────┘
                           │ metadata?        │
                           └──────────────────┘
+                         
+                         crs dict
+                         ┌──────────────────┐
+                         │ <uuid>:          │
+                         │   CRS object     │
+                         └──────────────────┘
 ```
 
-Nodes come in two roles. **Entity nodes** are the semantic things (a building, a road, a parcel) and are always geometry-free. **Geometry nodes** carry geometry through a `representations` binding (a CRS plus geometry UUIDs) and are linked to their entity via `geo:hasGeometry` - even when an entity has just one geometry. This mirrors GeoSPARQL's Feature/Geometry split and means every geometric encoding is its own referenceable node; see [Representations vs. Linked Nodes](#representations-vs-linked-nodes). Geometry objects live in a shared pool and are referenced by UUID; the same geometry UUID can appear in multiple geometry nodes, enabling instancing without data duplication.
+Nodes come in two roles. **Entity nodes** are the semantic things (a building, a road, a parcel) and are always geometry-free. **Geometry nodes** carry geometry through a `representations` binding (a CRS reference plus geometry UUIDs) and are linked to their entity via `geo:hasGeometry` - even when an entity has just one geometry. This mirrors GeoSPARQL's Feature/Geometry split and means every geometric encoding is its own referenceable node; see [Representations vs. Linked Nodes](#representations-vs-linked-nodes). Geometry objects live in a shared pool and are referenced by UUID; the same geometry UUID can appear in multiple geometry nodes, enabling instancing without data duplication. CRS definitions are also stored once in the `crs` dictionary and referenced by UUID from representations, enabling CRS reuse across the graph.
 
 Relations form directed edges between nodes and carry all structural semantics: spatial containment, adjacency, material composition, version lineage, and any other domain-specific relationship.
 
 ### Minimal Complete Document
 
-A valid LGD document with one geometry, one node, and one relation. All three top-level dicts are optional - omit any that are not needed.
+A valid LGD document with one geometry, one node, and one relation. All four top-level dicts are optional - omit any that are not needed.
 
 ```json
 {
   "context": {
     "bot": { "vocabulary": "https://w3id.org/bot#" },
     "geo": { "vocabulary": "http://www.opengis.net/ont/geosparql#" }
+  },
+  "crs": {
+    "cccccccc-0000-4000-8000-000000000002": { "id": { "authority": "EPSG", "code": 28992 } }
   },
   "geometries": {
     "aaaaaaaa-0000-4000-8000-000000000001": {
@@ -112,7 +122,7 @@ A valid LGD document with one geometry, one node, and one relation. All three to
       "type": "Footprint",
       "representations": {
         "cccccccc-0000-4000-8000-000000000002": {
-          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "crsId": "cccccccc-0000-4000-8000-000000000002",
           "geometryIds": ["aaaaaaaa-0000-4000-8000-000000000001"]
         }
       }
@@ -487,7 +497,7 @@ An entity is linked to its geometry node(s) **even when there is only one** - se
 
 The `type` field is intentionally unconstrained by the base schema. Applications that need a specific type vocabulary (IFC entity names, CityGML feature types, Uniclass codes) bind it through `context` and validate term membership against that ontology at the application layer - the same role split as for predicates.
 
-A **geometry node** (the UUID key is not part of the object itself - it lives as the dict key in the enclosing `nodes` dictionary). Descriptive metadata - such as `dcterms:*` provenance - lives on the node's `metadata`; the representation binds the geometry to a CRS and carries no metadata:
+A **geometry node** (the UUID key is not part of the object itself - it lives as the dict key in the enclosing `nodes` dictionary). Descriptive metadata - such as `dcterms:*` provenance - lives on the node's `metadata`; the representation binds the geometry to a CRS reference and carries no metadata:
 
 ```json
 {
@@ -498,7 +508,7 @@ A **geometry node** (the UUID key is not part of the object itself - it lives as
   },
   "representations": {
     "a1b2c3d4-0000-4000-8000-000000000001": {
-      "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+      "crsId": "cccccccc-0000-4000-8000-000000000001",
       "geometryIds": ["11223344-5566-4778-8990-aabbccddeeff"]
     }
   }
@@ -523,11 +533,11 @@ Geometry-free node - no `representations` field; all information lives in `metad
 
 #### Representation
 
-`representations` appears only on **geometry nodes** (entity nodes are geometry-free). Each entry is purely a geometry-to-CRS binding: it ties a set of geometry references to a coordinate reference system and an optional placement transform. **Representations carry no metadata** - all descriptive metadata (identity, `dcterms:*` provenance) lives on the node.
+`representations` appears only on **geometry nodes** (entity nodes are geometry-free). Each entry is purely a geometry-to-CRS binding: it ties a set of geometry references to a CRS (by UUID reference) and an optional placement transform. **Representations carry no metadata** - all descriptive metadata (identity, `dcterms:*` provenance) lives on the node.
 
 | Field | Required | Type | Description |
 |---|---|---|---|
-| `crs` | yes | CRS object | Coordinate reference system for this representation |
+| `crsId` | yes | UUID | UUID referencing a CRS entry in the graph's `crs` dictionary |
 | `geometryIds` | yes | array of UUID (unique, min 1) | UUIDs of geometry entries in the graph's `geometries` dict |
 | `outerpose` | no | transform | Affine transform applied after each geometry's `innerpose`; places the geometry set at a site |
 
@@ -553,12 +563,15 @@ The `geometryIds` array may reference multiple geometries, allowing a single rep
       "bbox": [[0, 0], [200, 100]]
     }
   },
+  "crs": {
+    "11111111-0000-4000-8000-000000000001": { "id": { "authority": "EPSG", "code": 25832 } }
+  },
   "nodes": {
     "ffffffff-0000-4000-8000-000000000001": {
       "type": "ParkingLotSurface",
       "representations": {
         "11111111-0000-4000-8000-000000000001": {
-          "crs": { "id": { "authority": "EPSG", "code": 25832 } },
+          "crsId": "11111111-0000-4000-8000-000000000001",
           "outerpose": { "scale": [1.0, 1.0], "translate": [350000.0, 5700000.0] },
           "geometryIds": ["eeeeeeee-0000-4000-8000-000000000001"]
         }
@@ -568,7 +581,7 @@ The `geometryIds` array may reference multiple geometries, allowing a single rep
       "type": "ParkingLotSurface",
       "representations": {
         "22222222-0000-4000-8000-000000000001": {
-          "crs": { "id": { "authority": "EPSG", "code": 25832 } },
+          "crsId": "11111111-0000-4000-8000-000000000001",
           "outerpose": { "scale": [1.0, 1.0], "translate": [350500.0, 5700000.0] },
           "geometryIds": ["eeeeeeee-0000-4000-8000-000000000001"]
         }
@@ -584,7 +597,7 @@ Representation with an `outerpose` that places a locally-modelled geometry into 
 
 ```json
 {
-  "crs": { "id": { "authority": "EPSG", "code": 25832 } },
+  "crsId": "aaaaaaaa-0000-4000-8000-000000000001",
   "outerpose": {
     "scale": [1.0, 1.0, 1.0],
     "rotation": [
@@ -607,7 +620,7 @@ To recover real-world coordinates for a geometry in a representation, apply tran
 
 1. **Innerpose** (per-geometry) - converts integer vertices to local real-world values.
 2. **Outerpose** (per-representation, optional) - applies an additional affine transform, positioning the geometry set at its site.
-3. **CRS** - the result lands in the coordinate system declared by the representation's `crs`.
+3. **CRS** - the result lands in the coordinate system referenced by the representation's `crsId`.
 
 #### Representations vs. Linked Nodes
 
@@ -829,11 +842,11 @@ The OGC URI, if wanted, lives inside `id`:
 }
 ```
 
-The two forms are discriminated by **`id` vs `type`**: a reference has `id` and no `type`; a PROJJSON object has `type` (and may also carry `id`). The reference form is an LGD subset reusing PROJJSON's `id`, and the PROJJSON form is its extension — so simple and full CRS share one vocabulary and **PROJJSON is a true superset**, not a parallel format. A worked inline example is [`examples/local-crs.json`](examples/local-crs.json).
+The two forms are discriminated by **`id` vs `type`**: a reference has `id` and no `type`; a PROJJSON object has `type` (and may also carry `id`). The reference form is an LGD subset reusing PROJJSON's `id`, and the PROJJSON form is its extension — so simple and full CRS share one vocabulary and **PROJJSON is a true superset**, not a parallel format. A worked example is [`examples/local-crs.json`](examples/local-crs.json).
 
 **Validation.** The base schema checks the *shape* only — a reference (`id` + optional `coordinateEpoch`) or an object with a `type`. Full PROJJSON validity (datum, parameters, …) is an application-layer / PROJ concern; producers wanting strict validation can check the PROJJSON form against the published PROJJSON schema.
 
-**Design decision — CRS at representation level:** Geometry objects carry no CRS. The CRS is declared on the representation that places a geometry into real-world space, so the same geometry can appear in representations with different CRS and geometry objects stay reusable.
+**Design decision — CRS at representation level:** Geometry objects carry no CRS. The CRS is referenced from the representation that places a geometry into real-world space, so the same geometry can appear in representations with different CRS (via different `crsId` references) and geometry objects stay reusable. CRS definitions themselves are stored once in the top-level `crs` dictionary and can be reused across multiple representations.
 
 **Design decision — why PROJJSON, and why these two forms (and not the alternatives):**
 
@@ -1094,7 +1107,7 @@ Ready-made LGD documents are provided in the `examples/` directory:
 | `examples/urban-graph.json` | `linkedgraph.schema.json` | A full graph with `context`, buildings, a road, value-object metadata, and relations |
 | `examples/building-representations.json` | `linkedgraph.schema.json` | A geometry-free `bot:Building` linked via `geo:hasGeometry` to separate `Footprint`, `CADModel`, and `LaserScan` nodes, with `prov:wasDerivedFrom` lineage - see [Representations vs. Linked Nodes](#representations-vs-linked-nodes) |
 | `examples/distributed/buildings.json` + `relations.json` | `linkedgraph.schema.json` (each) | A two-file [distributed dataset](#distributed-datasets): each file is self-contained with its own `context`, and `relations.json` references nodes defined in `buildings.json` |
-| `examples/local-crs.json` | `linkedgraph.schema.json` | A building whose footprint uses an **inline PROJJSON `EngineeringCRS`** (a site-local grid with no EPSG code) — the [CRS](#crs) case the `id` reference can't express |
+| `examples/local-crs.json` | `linkedgraph.schema.json` | A building whose footprint uses a **PROJJSON `EngineeringCRS`** (a site-local grid with no EPSG code) stored once in the top-level `crs` dict and referenced by `crsId` — the [CRS](#crs) case the simple `id` reference can't express |
 | `examples/material.json` | `linkedgraph.schema.json` | A `Material` entity with `mat:` quantity metadata, linked to a `Wall` by `hasMaterial`; its `context` binds the `mat` namespace to the example constraint below |
 | `examples/material.schema.json` | (is itself a constraint schema) | **Example** custom vocabulary constraint (not core): validates material quantities, pinning each `.unit` and range-checking each `.value` - demonstrates how a producer value-validates their own namespace |
 

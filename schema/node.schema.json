@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/node.schema.json",
   "title": "Graph Nodev0.1.0",
-  "description": "A node in a linked graph. Nodes represent domain entities (buildings, roads, sensors, etc.) identified by a UUID and classified by a type string. The node's UUID identity is its key in the enclosing `nodes` dictionary — the object itself carries no `id` field. Geometric representations are attached via the optional `representations` dict — each entry groups a set of geometry UUIDs from the graph's `geometries` dict with a CRS and an optional outer pose. Arbitrary application-specific properties are carried in the optional `metadata` object.",
+  "description": "A node in a linked graph. Nodes represent domain entities (buildings, roads, sensors, etc.) identified by a UUID and classified by a type string. The node's UUID identity is its key in the enclosing `nodes` dictionary — the object itself carries no `id` field. Geometric representations are attached via the optional `representations` dict — each entry groups a set of geometry UUIDs from the graph's `geometries` dict with a CRS reference (by UUID) and an optional outer pose. Arbitrary application-specific properties are carried in the optional `metadata` object.",
   "type": "object",
   "required": ["type"],
   "properties": {
@@ -15,16 +15,16 @@
 
     "representations": {
       "type": "object",
-      "description": "Optional UUID-keyed dictionary of geometric representations of this node. Each entry is purely a geometry-to-CRS binding: it groups one or more geometry UUIDs (referencing keys in the enclosing graph's `geometries` dict) with a coordinate reference system and an optional outer pose. Representations carry no metadata — descriptive metadata about the encoding (LOD, provenance) lives on the node's `metadata`. A node typically has one representation; multiple entries are for the same geometry in alternative serializations (e.g. an OBJ and a PLY GeometryLink, distinguished by their `mime`) or different CRS projections. Distinct encodings that need their own identity or relations (e.g. a conversion recorded via `prov:wasDerivedFrom`) are modelled as separate nodes.",
+      "description": "Optional UUID-keyed dictionary of geometric representations of this node. Each entry is purely a geometry-to-CRS binding: it groups one or more geometry UUIDs (referencing keys in the enclosing graph's `geometries` dict) with a CRS reference (by UUID) and an optional outer pose. Representations carry no metadata — descriptive metadata about the encoding (LOD, provenance) lives on the node's `metadata`. A node typically has one representation; multiple entries are for the same geometry in alternative serializations (e.g. an OBJ and a PLY GeometryLink, distinguished by their `mime`) or different CRS projections. Distinct encodings that need their own identity or relations (e.g. a conversion recorded via `prov:wasDerivedFrom`) are modelled as separate nodes.",
       "propertyNames": { "$ref": "objects.schema.json#/$defs/uuid" },
       "additionalProperties": {
         "type": "object",
-        "required": ["crs", "geometryIds"],
+        "required": ["crsId", "geometryIds"],
         "properties": {
 
-          "crs": {
-            "$ref": "objects.schema.json#/$defs/crs",
-            "description": "CRS for this representation — the coordinate reference system that real-world coordinates land in after all geometry innerposes and the optional outerpose are applied. Either a compact reference `{ \"id\": { \"authority\": \"EPSG\", \"code\": 28992 } }` (with optional `coordinateEpoch` for dynamic datums, e.g. `{ \"id\": { \"authority\": \"EPSG\", \"code\": 7912 }, \"coordinateEpoch\": 2023.456 }`), or a full PROJJSON CRS / CoordinateMetadata object for custom/local/engineering CRS. See objects.schema.json#/$defs/crs."
+          "crsId": {
+            "$ref": "objects.schema.json#/$defs/uuid",
+            "description": "UUID referencing a CRS entry in the enclosing graph's `crs` dictionary. The CRS defines the coordinate reference system that real-world coordinates land in after all geometry innerposes and the optional outerpose are applied. Referential integrity — that this UUID exists in `crs` — cannot be enforced by JSON Schema and MUST be verified at the application layer."
           },
 
           "outerpose": {

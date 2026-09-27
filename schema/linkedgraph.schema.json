@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/linkedgraph.schema.json",
   "title": "Linked Graphv0.1.0",
-  "description": "A linked graph document composed of three UUID-keyed dictionaries: geometries, nodes, and relations, plus an optional `context`. Every key in those three entry dictionaries is a UUID in canonical 8-4-4-4-12 hex format, enforced by the schema (keys of the optional `context` are namespace prefixes, not UUIDs). All dictionaries are optional — a valid graph may contain any combination. The UUID key is the sole identity of each entry — node, relation, and representation objects carry no redundant `id` field. Geometric representations of nodes are expressed via the `representations` field on each node, grouping geometry UUIDs with a CRS and optional outer pose. Cross-references between entries (e.g. relation source/target, representation geometryIds) are UUID strings; referential integrity cannot be enforced by JSON Schema and MUST be verified at the application layer. The optional `context` binds namespace prefixes used in predicates, node types, and metadata keys to ontologies and validators; that a used prefix is declared in `context` is likewise an application-layer check.",
+  "description": "A linked graph document composed of four UUID-keyed dictionaries: geometries, nodes, relations, and crs, plus an optional `context`. Every key in those four entry dictionaries is a UUID in canonical 8-4-4-4-12 hex format, enforced by the schema (keys of the optional `context` are namespace prefixes, not UUIDs). All dictionaries are optional — a valid graph may contain any combination. The UUID key is the sole identity of each entry — node, relation, representation, and CRS objects carry no redundant `id` field. Geometric representations of nodes are expressed via the `representations` field on each node, grouping geometry UUIDs with a CRS reference and optional outer pose. Cross-references between entries (e.g. relation source/target, representation geometryIds and crsId) are UUID strings; referential integrity cannot be enforced by JSON Schema and MUST be verified at the application layer. The optional `context` binds namespace prefixes used in predicates, node types, and metadata keys to ontologies and validators; that a used prefix is declared in `context` is likewise an application-layer check.",
   "type": "object",
   "properties": {
 
@@ -35,6 +35,13 @@
       "description": "UUID-keyed dictionary of directed relations between nodes. Each key must be a UUID; each value must be a valid relation object (relations.schema.json). The key is the relation's UUID identity — relation objects carry no `id` field.",
       "propertyNames": { "$ref": "objects.schema.json#/$defs/uuid" },
       "additionalProperties": { "$ref": "relations.schema.json" }
+    },
+
+    "crs": {
+      "type": "object",
+      "description": "UUID-keyed dictionary of coordinate reference system entries. Each key must be a UUID; each value must be a valid CRS object (objects.schema.json#/$defs/crs). The key is the CRS's UUID identity — CRS objects carry no `id` field. CRS definitions are stored once here and referenced by UUID from representations, enabling CRS reuse across the graph.",
+      "propertyNames": { "$ref": "objects.schema.json#/$defs/uuid" },
+      "additionalProperties": { "$ref": "objects.schema.json#/$defs/crs" }
     },
 
     "globalextent": {

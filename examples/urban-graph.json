@@ -5,6 +5,10 @@
     "xsd":     { "vocabulary": "http://www.w3.org/2001/XMLSchema#" },
     "dcterms": { "vocabulary": "http://purl.org/dc/terms/" }
   },
+  "crs": {
+    "aa000001-0000-4000-8000-000000000001": { "id": { "authority": "EPSG", "code": 28992 } },
+    "aa000002-0000-4000-8000-000000000002": { "id": { "authority": "EPSG", "code": 7415 }, "coordinateEpoch": 2023.456 }
+  },
   "geometries": {
 
     "11223344-5566-4778-8990-aabbccddeeff": {
@@ -112,7 +116,7 @@
       },
       "representations": {
         "aa000001-0000-4000-8000-000000000001": {
-          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "crsId": "aa000001-0000-4000-8000-000000000001",
           "geometryIds": ["11223344-5566-4778-8990-aabbccddeeff"]
         }
       }
@@ -128,7 +132,7 @@
       },
       "representations": {
         "aa000003-0000-4000-8000-000000000003": {
-          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "crsId": "aa000001-0000-4000-8000-000000000001",
           "geometryIds": ["bb000001-0000-4000-8000-000000000001"]
         }
       }
@@ -143,7 +147,7 @@
       },
       "representations": {
         "aa000004-0000-4000-8000-000000000004": {
-          "crs": { "id": { "authority": "EPSG", "code": 7415 }, "coordinateEpoch": 2023.456 },
+          "crsId": "aa000002-0000-4000-8000-000000000002",
           "geometryIds": ["bb000002-0000-4000-8000-000000000002"]
         }
       }
@@ -169,7 +173,7 @@
       },
       "representations": {
         "aa000002-0000-4000-8000-000000000002": {
-          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "crsId": "aa000001-0000-4000-8000-000000000001",
           "geometryIds": ["ffeeddcc-bbaa-4998-8776-554433221100"]
         }
       }

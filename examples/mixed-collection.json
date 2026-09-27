@@ -2,6 +2,9 @@
   "context": {
     "geo": { "vocabulary": "http://www.opengis.net/ont/geosparql#" }
   },
+  "crs": {
+    "aaaaaaaa-1000-4000-8000-000000000001": { "id": { "authority": "EPSG", "code": 25832 } }
+  },
   "geometries": {
 
     "aaaaaaaa-0000-4000-8000-000000000001": {
@@ -88,7 +91,7 @@
       "type": "RoadCenterline",
       "representations": {
         "aaaaaaaa-1000-4000-8000-000000000001": {
-          "crs": { "id": { "authority": "EPSG", "code": 25832 } },
+          "crsId": "aaaaaaaa-1000-4000-8000-000000000001",
           "outerpose": {
             "scale": [1.0, 1.0, 1.0],
             "rotation": [
@@ -111,7 +114,7 @@
       "type": "BuildingSolid",
       "representations": {
         "bbbbbbbb-1000-4000-8000-000000000002": {
-          "crs": { "id": { "authority": "EPSG", "code": 25832 } },
+          "crsId": "aaaaaaaa-1000-4000-8000-000000000001",
           "outerpose": {
             "scale": [1.0, 1.0, 1.0],
             "rotation": [
@@ -134,7 +137,7 @@
       "type": "ParcelSurface",
       "representations": {
         "cccccccc-1000-4000-8000-000000000003": {
-          "crs": { "id": { "authority": "EPSG", "code": 25832 } },
+          "crsId": "aaaaaaaa-1000-4000-8000-000000000001",
           "outerpose": {
             "scale": [1.0, 1.0, 1.0],
             "rotation": [

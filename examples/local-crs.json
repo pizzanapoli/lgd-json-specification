@@ -3,6 +3,24 @@
     "bot": { "vocabulary": "https://w3id.org/bot#" },
     "geo": { "vocabulary": "http://www.opengis.net/ont/geosparql#" }
   },
+  "crs": {
+    "cccc1111-0000-4000-8000-000000000001": {
+      "type": "EngineeringCRS",
+      "name": "Site local grid (origin at SW setting-out point)",
+      "datum": {
+        "type": "EngineeringDatum",
+        "name": "Site origin"
+      },
+      "coordinate_system": {
+        "subtype": "Cartesian",
+        "axis": [
+          { "name": "Easting",  "abbreviation": "E", "direction": "east",  "unit": "metre" },
+          { "name": "Northing", "abbreviation": "N", "direction": "north", "unit": "metre" },
+          { "name": "Height",   "abbreviation": "H", "direction": "up",    "unit": "metre" }
+        ]
+      }
+    }
+  },
   "geometries": {
     "bbbb1111-0000-4000-8000-000000000001": {
       "type": "Polygon",
@@ -23,22 +41,7 @@
       "type": "Footprint",
       "representations": {
         "cccc1111-0000-4000-8000-000000000001": {
-          "crs": {
-            "type": "EngineeringCRS",
-            "name": "Site local grid (origin at SW setting-out point)",
-            "datum": {
-              "type": "EngineeringDatum",
-              "name": "Site origin"
-            },
-            "coordinate_system": {
-              "subtype": "Cartesian",
-              "axis": [
-                { "name": "Easting",  "abbreviation": "E", "direction": "east",  "unit": "metre" },
-                { "name": "Northing", "abbreviation": "N", "direction": "north", "unit": "metre" },
-                { "name": "Height",   "abbreviation": "H", "direction": "up",    "unit": "metre" }
-              ]
-            }
-          },
+          "crsId": "cccc1111-0000-4000-8000-000000000001",
           "geometryIds": ["bbbb1111-0000-4000-8000-000000000001"]
         }
       }

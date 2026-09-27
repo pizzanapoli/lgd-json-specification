@@ -3,6 +3,9 @@
     "bot": { "vocabulary": "https://w3id.org/bot#" },
     "geo": { "vocabulary": "http://www.opengis.net/ont/geosparql#" }
   },
+  "crs": {
+    "c0000000-0000-4000-8000-000000000001": { "id": { "authority": "EPSG", "code": 28992 } }
+  },
   "geometries": {
     "a0000000-0000-4000-8000-000000000001": {
       "type": "Polygon",
@@ -23,7 +26,7 @@
       "type": "Footprint",
       "representations": {
         "c0000000-0000-4000-8000-000000000001": {
-          "crs": { "id": { "authority": "EPSG", "code": 28992 } },
+          "crsId": "c0000000-0000-4000-8000-000000000001",
           "geometryIds": ["a0000000-0000-4000-8000-000000000001"]
         }
       }
