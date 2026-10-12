@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/node.schema.json",
-  "title": "Graph Nodev0.1.0",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/node.schema.json",
+  "title": "Graph Node v0.2.0",
   "description": "A node in a linked graph. Nodes represent domain entities (buildings, roads, sensors, etc.) identified by a UUID and classified by a type string. The node's UUID identity is its key in the enclosing `nodes` dictionary — the object itself carries no `id` field. Geometric representations are attached via the optional `representations` dict — each entry groups a set of geometry UUIDs from the graph's `geometries` dict with a CRS reference (by UUID) and an optional outer pose. Arbitrary application-specific properties are carried in the optional `metadata` object.",
   "type": "object",
   "required": ["type"],

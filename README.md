@@ -1083,15 +1083,15 @@ Schemas use JSON Schema Draft 2020-12 (`$schema: https://json-schema.org/draft/2
 
 Each release is tagged, and the schema files are addressable at stable, version-pinned URLs served directly from GitHub. These URLs are immutable for the lifetime of the tag and can be used as `$schema` / `$ref` targets by external validators.
 
-| File | Versioned URI (v0.1.0) |
+| File | Versioned URI (v0.2.0) |
 |---|---|
-| `linkedgraph.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/linkedgraph.schema.json` |
-| `geometry.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/geometry.schema.json` |
-| `node.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/node.schema.json` |
-| `relations.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/relations.schema.json` |
-| `objects.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/objects.schema.json` |
+| `linkedgraph.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/linkedgraph.schema.json` |
+| `geometry.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/geometry.schema.json` |
+| `node.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/node.schema.json` |
+| `relations.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/relations.schema.json` |
+| `objects.schema.json` | `https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/objects.schema.json` |
 
-To pin a different version, replace `v0.1.0` in the path with the desired release tag. URLs resolve only after the matching tag has been pushed.
+To pin a different version, replace `v0.2.0` in the path with the desired release tag. URLs resolve only after the matching tag has been pushed.
 
 ---
 

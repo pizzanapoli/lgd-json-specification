@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/objects.schema.json",
-  "title": "Shared Graph Object Definitionsv0.1.0",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/objects.schema.json",
+  "title": "Shared Graph Object Definitions v0.2.0",
   "description": "Definitions-only schema providing reusable primitives shared across node.schema.json, relations.schema.json, and linkedgraph.schema.json. Contains no standalone-validatable root type — it is a library of $defs.",
 
   "$defs": {

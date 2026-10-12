@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/relations.schema.json",
-  "title": "Graph Relationv0.1.0",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/relations.schema.json",
+  "title": "Graph Relation v0.2.0",
   "description": "A directed relation (edge) between two nodes in a linked graph. The relation's UUID identity is its key in the enclosing `relations` dictionary — the object itself carries no `id` field. The relation classifies the relationship with a predicate string and names source and target nodes by their UUIDs. Arbitrary application-specific properties are carried in the optional `metadata` object. Relations are always directed (source → target); undirected relationships can be modelled by convention in `predicate` or by creating two opposing relations.",
   "type": "object",
   "required": ["predicate", "source", "target"],

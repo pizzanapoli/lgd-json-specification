@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/geometry.schema.json",
-  "title": "Geometryv0.1.0",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/geometry.schema.json",
+  "title": "Geometry v0.2.0",
   "description": "Unified geometry schema merging GeoJSON (RFC 7946) and CityJSON (v2.0.2) geometry types. Design principles: (1) indexed vertex storage — all coordinates live in a per-geometry `vertices` array; `boundaries` contain only non-negative integer indices; (2) integer-only coordinates — every vertex component is an integer; real-world values are recovered via the per-geometry `innerpose` object as: real[i] = vertex[i] * scale[i] + translate[i]; (3) one canonical type per geometric concept — no alias types; (4) implicit ring closure — the first vertex index is never repeated at the end of a ring; (5) geometry objects are pure shape descriptors — no LoD, no semantic surface annotation; (6) CRS is declared at the representation level in the enclosing linked graph; geometry objects carry no CRS.",
   "oneOf": [
     { "$ref": "#/$defs/Point" },

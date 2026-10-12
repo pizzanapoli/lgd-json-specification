@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.1.0/schema/linkedgraph.schema.json",
-  "title": "Linked Graphv0.1.0",
+  "$id": "https://raw.githubusercontent.com/pizzanapoli/lgd-json-specification/refs/tags/v0.2.0/schema/linkedgraph.schema.json",
+  "title": "Linked Graph v0.2.0",
   "description": "A linked graph document composed of four UUID-keyed dictionaries: geometries, nodes, relations, and crs, plus an optional `context`. Every key in those four entry dictionaries is a UUID in canonical 8-4-4-4-12 hex format, enforced by the schema (keys of the optional `context` are namespace prefixes, not UUIDs). All dictionaries are optional — a valid graph may contain any combination. The UUID key is the sole identity of each entry — node, relation, representation, and CRS objects carry no redundant `id` field. Geometric representations of nodes are expressed via the `representations` field on each node, grouping geometry UUIDs with a CRS reference and optional outer pose. Cross-references between entries (e.g. relation source/target, representation geometryIds and crsId) are UUID strings; referential integrity cannot be enforced by JSON Schema and MUST be verified at the application layer. The optional `context` binds namespace prefixes used in predicates, node types, and metadata keys to ontologies and validators; that a used prefix is declared in `context` is likewise an application-layer check.",
   "type": "object",
   "properties": {
