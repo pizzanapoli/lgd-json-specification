@@ -18,8 +18,8 @@ authors:
   - family-names: Clemen
     given-names: Christian
     affiliation: "HTW Dresden"
-version: 0.1.0
-date-released: "2026-06-18"
+version: 0.2.0
+date-released: "2026-10-12"
 doi: "10.5281/zenodo.21307295"
 license: CC-BY-4.0
 repository-code: "https://github.com/pizzanapoli/lgd-json-specification"
